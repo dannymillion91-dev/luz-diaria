@@ -783,24 +783,22 @@ function HabitTracker({ onBack }) {
                     <button className="icon-btn" aria-label="Borrar" onClick={() => deleteHabit(habit.id)} style={{ background: 'transparent', border: 'none', color: '#666', borderRadius: 8, padding: 8, cursor: 'pointer', display: 'flex' }}><Trash2 size={15} /></button>
                   </div>
                 </div>
-                {/* Números de los días (1 al 31) alineados encima de cada cuadrito */}
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(31, 1fr)', gap: 2, marginBottom: 3 }}>
-                  {cells.map((c) => (
-                    <div key={'num' + c.day} style={{ fontSize: 8, lineHeight: 1, textAlign: 'center', fontWeight: c.date === today ? 700 : 400, color: c.valid ? (c.date === today ? ACCENT : '#8a7f66') : 'transparent' }}>{c.day}</div>
-                  ))}
-                </div>
-                {/* Los 31 cuadritos del mes actual */}
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(31, 1fr)', gap: 2 }}>
+                {/* Días del mes en 2 filas (16 + 15) con el número encima de cada cuadrito. Menos columnas = cuadritos más grandes. */}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(16, 1fr)', columnGap: 4, rowGap: 8 }}>
                   {cells.map((c) => {
-                    if (!c.valid) {
-                      // Día que este mes no tiene (p. ej. el 31 en un mes de 30): vacío e inactivo
-                      return <div key={'cell' + c.day} title="Este mes no llega a ese día" style={{ aspectRatio: '1', borderRadius: 4, background: 'transparent', border: `1px dashed ${BORDER}`, opacity: 0.35, boxSizing: 'border-box' }} />;
-                    }
-                    const marked = !!habit.checks[c.date];
-                    const isTodayCell = c.date === today;
+                    const marked = c.valid && !!habit.checks[c.date];
+                    const isTodayCell = c.valid && c.date === today;
                     return (
-                      <div key={'cell' + c.day} className="cell" title={friendlyDate(c.date)} onClick={() => toggleCheck(habit.id, c.date)}
-                        style={{ aspectRatio: '1', borderRadius: 4, cursor: 'pointer', background: marked ? habit.color : UNMARKED, opacity: marked ? 1 : 0.55, border: isTodayCell ? `1.5px solid ${marked ? '#fff' : ACCENT}` : 'none', boxSizing: 'border-box' }} />
+                      <div key={'u' + c.day} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
+                        <span style={{ fontSize: 9.5, lineHeight: 1, fontWeight: isTodayCell ? 700 : 400, color: c.valid ? (isTodayCell ? ACCENT : '#8a7f66') : 'transparent' }}>{c.day}</span>
+                        {c.valid ? (
+                          <div className="cell" title={friendlyDate(c.date)} onClick={() => toggleCheck(habit.id, c.date)}
+                            style={{ width: '100%', aspectRatio: '1', borderRadius: 5, cursor: 'pointer', background: marked ? habit.color : UNMARKED, opacity: marked ? 1 : 0.55, border: isTodayCell ? `2px solid ${marked ? '#fff' : ACCENT}` : 'none', boxSizing: 'border-box' }} />
+                        ) : (
+                          // Día que este mes no tiene (p. ej. el 31 en un mes de 30): vacío e inactivo
+                          <div title="Este mes no llega a ese día" style={{ width: '100%', aspectRatio: '1', borderRadius: 5, background: 'transparent', border: `1px dashed ${BORDER}`, opacity: 0.35, boxSizing: 'border-box' }} />
+                        )}
+                      </div>
                     );
                   })}
                 </div>
