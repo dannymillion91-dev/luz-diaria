@@ -1,5 +1,5 @@
 // Service Worker — guarda la app en el dispositivo para que funcione sin internet.
-const CACHE = 'luz-dorada-v1';
+const CACHE = 'luz-dorada-v2';
 const ASSETS = [
   './',
   'index.html',

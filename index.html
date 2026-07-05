@@ -155,14 +155,42 @@ function calcBestStreak(checks) {
 }
 
 function calcMonthPct(checks) {
-  const days = last30Days();
-  const marked = days.filter((d) => checks[d]).length;
-  return Math.round((marked / 30) * 100);
+  const cells = currentMonthCells();
+  const total = cells.filter((c) => c.valid).length;
+  const marked = cells.filter((c) => c.valid && checks[c.date]).length;
+  return total ? Math.round((marked / total) * 100) : 0;
 }
 
 const MESES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+const DIAS_SEMANA = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
+
+// Convierte '2026-07-05' en 'Martes 5 de julio' (fecha completa y legible)
+function friendlyDate(ds) {
+  const [y, m, d] = ds.split('-').map(Number);
+  const dt = new Date(y, m - 1, d);
+  const nombre = DIAS_SEMANA[dt.getDay()];
+  return `${nombre.charAt(0).toUpperCase()}${nombre.slice(1)} ${d} de ${MESES[m - 1]}`;
+}
 const YEARS = [2024, 2025, 2026, 2027, 2028, 2029, 2030];
 function daysInMonth(year, month) { return new Date(year, month, 0).getDate(); } // month 1-12
+
+// Genera SIEMPRE 31 cuadritos del mes actual. Los días que el mes no tiene
+// (p. ej. el 31 en un mes de 30) se marcan como no válidos: quedan vacíos e inactivos.
+function currentMonthCells() {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = now.getMonth() + 1; // 1-12
+  const dim = daysInMonth(year, month);
+  const cells = [];
+  for (let day = 1; day <= 31; day++) {
+    if (day <= dim) {
+      cells.push({ day, date: `${year}-${pad(month)}-${pad(day)}`, valid: true });
+    } else {
+      cells.push({ day, date: null, valid: false });
+    }
+  }
+  return cells;
+}
 
 // ============================================================
 //  BÓVEDA CIFRADA — todo lo que ella escribe se guarda cifrado
@@ -608,7 +636,8 @@ function HabitTracker({ onBack }) {
   const [formColor, setFormColor] = useState(COLORS[0]);
 
   const today = todayStr();
-  const days = useMemo(() => last30Days(), []);
+  const cells = useMemo(() => currentMonthCells(), []); // 31 cuadritos del mes actual
+  const nombreMes = MESES[new Date().getMonth()];
 
   useEffect(() => {
     (async () => {
@@ -665,6 +694,11 @@ function HabitTracker({ onBack }) {
       return { ...h, checks };
     }));
   }
+  function resetAll() {
+    if (window.confirm('¿REINICIO GENERAL? Se vaciarán los cuadritos de TODAS las prácticas. Esto no se puede deshacer.')) {
+      setHabits((hs) => hs.map((h) => ({ ...h, checks: {} })));
+    }
+  }
 
   if (loading) return <div className="loading">Cargando...</div>;
 
@@ -682,10 +716,18 @@ function HabitTracker({ onBack }) {
             <div style={{ color: '#c9a86a', fontSize: 13, marginTop: 4, letterSpacing: '0.06em' }}>LUZ DORADA DEL SER</div>
             <div style={{ color: '#888', fontSize: 14, marginTop: 6 }}>{dateLabel}</div>
           </div>
-          <button className="btn-primary" onClick={openCreate}
-            style={{ display: 'flex', alignItems: 'center', gap: 8, background: ACCENT, color: '#2a1c06', border: 'none', borderRadius: 10, padding: '10px 18px', fontSize: 14, fontWeight: 600, cursor: 'pointer' }}>
-            <Plus size={16} /> Nueva práctica
-          </button>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'stretch', gap: 8 }}>
+            {habits.length > 0 && (
+              <button className="reset-btn" onClick={resetAll}
+                style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, background: 'transparent', color: '#e35d4c', border: '1px solid #c0392b', borderRadius: 10, padding: '9px 18px', fontSize: 13, fontWeight: 600, cursor: 'pointer', letterSpacing: 0.3, whiteSpace: 'nowrap' }}>
+                ↺ Reiniciar todo
+              </button>
+            )}
+            <button className="btn-primary" onClick={openCreate}
+              style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, background: ACCENT, color: '#2a1c06', border: 'none', borderRadius: 10, padding: '10px 18px', fontSize: 14, fontWeight: 600, cursor: 'pointer' }}>
+              <Plus size={16} /> Nueva práctica
+            </button>
+          </div>
         </div>
 
         {/* Banner del día */}
@@ -736,23 +778,31 @@ function HabitTracker({ onBack }) {
                     <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><Trophy size={14} color={best > 0 ? '#c7b87a' : '#555'} />{best} mejor</span>
                     <span>{pct}% del mes</span>
                   </div>
-                  <div style={{ display: 'flex', gap: 4 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
                     <button className="icon-btn" aria-label="Editar" onClick={() => openEdit(habit)} style={{ background: 'transparent', border: 'none', color: '#666', borderRadius: 8, padding: 8, cursor: 'pointer', display: 'flex' }}><Edit3 size={15} /></button>
                     <button className="icon-btn" aria-label="Borrar" onClick={() => deleteHabit(habit.id)} style={{ background: 'transparent', border: 'none', color: '#666', borderRadius: 8, padding: 8, cursor: 'pointer', display: 'flex' }}><Trash2 size={15} /></button>
                   </div>
                 </div>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(30, 1fr)', gap: 4 }}>
-                  {days.map((date) => {
-                    const marked = !!habit.checks[date];
-                    const isTodayCell = date === today;
+                {/* Números de los días (1 al 31) alineados encima de cada cuadrito */}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(31, 1fr)', gap: 2, marginBottom: 3 }}>
+                  {cells.map((c) => (
+                    <div key={'num' + c.day} style={{ fontSize: 8, lineHeight: 1, textAlign: 'center', fontWeight: c.date === today ? 700 : 400, color: c.valid ? (c.date === today ? ACCENT : '#8a7f66') : 'transparent' }}>{c.day}</div>
+                  ))}
+                </div>
+                {/* Los 31 cuadritos del mes actual */}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(31, 1fr)', gap: 2 }}>
+                  {cells.map((c) => {
+                    if (!c.valid) {
+                      // Día que este mes no tiene (p. ej. el 31 en un mes de 30): vacío e inactivo
+                      return <div key={'cell' + c.day} title="Este mes no llega a ese día" style={{ aspectRatio: '1', borderRadius: 4, background: 'transparent', border: `1px dashed ${BORDER}`, opacity: 0.35, boxSizing: 'border-box' }} />;
+                    }
+                    const marked = !!habit.checks[c.date];
+                    const isTodayCell = c.date === today;
                     return (
-                      <div key={date} className="cell" title={date} onClick={() => toggleCheck(habit.id, date)}
-                        style={{ aspectRatio: '1', borderRadius: 4, background: marked ? habit.color : UNMARKED, opacity: marked ? 1 : 0.55, border: isTodayCell ? `1.5px solid ${marked ? '#fff' : ACCENT}` : 'none', boxSizing: 'border-box' }} />
+                      <div key={'cell' + c.day} className="cell" title={friendlyDate(c.date)} onClick={() => toggleCheck(habit.id, c.date)}
+                        style={{ aspectRatio: '1', borderRadius: 4, cursor: 'pointer', background: marked ? habit.color : UNMARKED, opacity: marked ? 1 : 0.55, border: isTodayCell ? `1.5px solid ${marked ? '#fff' : ACCENT}` : 'none', boxSizing: 'border-box' }} />
                     );
                   })}
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, color: '#555', marginTop: 6 }}>
-                  <span>hace 30 días</span><span>hoy</span>
                 </div>
               </div>
             );
