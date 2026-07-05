@@ -1,0 +1,16 @@
+{
+  "name": "Cronograma del Aprendiz — Luz Dorada del Ser",
+  "short_name": "Luz Dorada",
+  "description": "Prácticas diarias y diario de sueños, privado y cifrado.",
+  "start_url": "index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0b0a14",
+  "theme_color": "#0f0f1a",
+  "lang": "es",
+  "icons": [
+    { "src": "assets/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "assets/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}
