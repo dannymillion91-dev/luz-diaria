@@ -1,7 +1,6 @@
 // Service Worker — guarda la app en el dispositivo para que funcione sin internet.
-const CACHE = 'luz-dorada-v3';
+const CACHE = 'luz-dorada-v4';
 const ASSETS = [
-  './',
   'index.html',
   'manifest.json',
   'assets/vendor/react.production.min.js',
@@ -52,7 +51,7 @@ self.addEventListener('fetch', (e) => {
           }
           return res;
         })
-        .catch(() => caches.match(req).then((c) => c || caches.match('index.html') || caches.match('habitos.html')))
+        .catch(() => caches.match(req).then((c) => c || caches.match('index.html') || caches.match('index.html')))
     );
     return;
   }

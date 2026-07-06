@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Cronograma del Aprendiz · Luz Dorada del Ser</title>
 <meta name="theme-color" content="#0f0f1a">
 <meta name="description" content="Cronograma del Aprendiz — prácticas diarias y diario de sueños, privado y cifrado.">
@@ -1125,7 +1125,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(<App />);
     50% { box-shadow: 0 0 26px 4px rgba(255, 212, 120, 0.16); }
   }
   .interior-back {
-    position: absolute; top: 22px; left: 22px; z-index: 8;
+    position: absolute; top: calc(22px + env(safe-area-inset-top)); left: calc(22px + env(safe-area-inset-left)); z-index: 8;
     display: inline-flex; align-items: center; gap: 6px;
     background: rgba(20, 16, 30, 0.6); border: 1px solid rgba(255, 255, 255, 0.14);
     color: #e6dcc4; border-radius: 999px; padding: 8px 16px; font-size: 13px; cursor: pointer;
@@ -1134,7 +1134,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(<App />);
   }
   .interior-back:hover { background: rgba(40, 32, 58, 0.85); }
   .interior-backup {
-    position: absolute; top: 22px; right: 22px; z-index: 8;
+    position: absolute; top: calc(22px + env(safe-area-inset-top)); right: calc(22px + env(safe-area-inset-right)); z-index: 8;
     display: inline-flex; align-items: center; gap: 6px;
     background: rgba(20, 16, 30, 0.6); border: 1px solid rgba(255, 255, 255, 0.14);
     color: #e6dcc4; border-radius: 999px; padding: 8px 15px; font-size: 12px; cursor: pointer;
@@ -1216,7 +1216,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(<App />);
   .t-sub { font-family: 'Cinzel', serif; font-size: 15px; letter-spacing: 0.14em; color: #cbb98f; }
 
   .temple-back, .back-link {
-    position: absolute; top: 22px; left: 22px; z-index: 8;
+    position: absolute; top: calc(22px + env(safe-area-inset-top)); left: calc(22px + env(safe-area-inset-left)); z-index: 8;
     display: inline-flex; align-items: center; gap: 6px;
     background: rgba(20,16,30,0.6); border: 1px solid rgba(255,255,255,0.14);
     color: #d7cceb; border-radius: 999px; padding: 8px 16px; font-size: 13px; cursor: pointer;
