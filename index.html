@@ -1105,21 +1105,17 @@ ReactDOM.createRoot(document.getElementById('root')).render(<App />);
   /* Zonas clicables sobre cada pergamino */
   .scroll-zone {
     position: absolute; z-index: 3; cursor: pointer; border: none; background: transparent;
-    border-radius: 16px; outline: none;
-    transition: box-shadow 0.3s ease, background 0.3s ease, transform 0.3s ease;
-    animation: scrollHint 3.2s ease-in-out infinite;
+    outline: none;
   }
-  .zone-practicas { left: 5.5%; top: 43%; width: 38%; height: 45%; }
-  .zone-suenos { left: 62.5%; top: 43%; width: 25%; height: 45%; }
-  .scroll-zone:hover, .scroll-zone:focus-visible {
-    background: radial-gradient(ellipse at center, rgba(255, 224, 150, 0.20), transparent 70%);
-    box-shadow: 0 0 46px 8px rgba(255, 212, 120, 0.4);
-    transform: scale(1.03); animation: none;
+  .zone-practicas { left: 5.5%; top: 43%; width: 36%; height: 46%; }
+  .zone-suenos { left: 54.5%; top: 43%; width: 36%; height: 46%; }
+  /* Luz dorada que se enciende y respira al pasar el cursor / tocar el pergamino */
+  .scroll-zone:hover, .scroll-zone:focus-visible, .scroll-zone:active {
+    background: radial-gradient(ellipse 72% 58% at 50% 48%, rgba(255,226,150,0.32), rgba(255,205,110,0.13) 45%, rgba(255,205,110,0) 70%);
+    mix-blend-mode: screen;
+    animation: zoneGlow 1.7s ease-in-out infinite;
   }
-  @keyframes scrollHint {
-    0%, 100% { box-shadow: 0 0 0 0 rgba(255, 212, 120, 0); }
-    50% { box-shadow: 0 0 26px 4px rgba(255, 212, 120, 0.16); }
-  }
+  @keyframes zoneGlow { 0%, 100% { opacity: 0.7; } 50% { opacity: 1; } }
   .interior-back {
     position: absolute; top: calc(22px + env(safe-area-inset-top)); left: calc(22px + env(safe-area-inset-left)); z-index: 8;
     display: inline-flex; align-items: center; gap: 6px;
